@@ -32,23 +32,6 @@ function EyeIcon() {
   )
 }
 
-function SocialIcon({ kind }: { kind: "google" | "apple" }) {
-  return kind === "google" ? (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current">
-      <path d="M21.35 11.1H12v2.95h5.36c-.23 1.26-.95 2.33-2.04 3.05v2.54h3.29c1.92-1.77 3.02-4.39 3.02-7.49 0-.72-.06-1.42-.28-2.05Z" />
-      <path d="M12 22c2.75 0 5.05-.91 6.73-2.46l-3.29-2.54c-.91.61-2.08.97-3.44.97-2.65 0-4.89-1.79-5.69-4.2H2.91v2.63A10 10 0 0 0 12 22Z" />
-      <path d="M6.31 13.77a5.97 5.97 0 0 1 0-3.54V7.6H2.91a10 10 0 0 0 0 8.8l3.4-2.63Z" />
-      <path d="M12 5.16c1.5 0 2.85.52 3.91 1.54l2.93-2.93A9.8 9.8 0 0 0 12 2 10 10 0 0 0 2.91 7.6l3.4 2.63C7.11 6.95 9.35 5.16 12 5.16Z" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[1.6]">
-      <path d="M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
-      <path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-      <path d="M7.5 18.2c.9-1.8 2.4-2.9 4.5-2.9s3.6 1.1 4.5 2.9" />
-    </svg>
-  )
-}
-
 function Label({ children }: { children: ReactNode }) {
   return <label className="mb-2 block text-[0.95rem] font-semibold tracking-[0.14em] text-stone-900">{children}</label>
 }
