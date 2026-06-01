@@ -11,8 +11,8 @@ const links = [
     { href: "/about", label: "About" },
 ]
 
-const DARK = "#1A1C1E"
-const WHITE = "#FFFFFF"
+const DARK = "#614798"
+const WHITE = "#FFFCF8"
 
 export default function Navbar() {
     const [searchOpen, setSearchOpen] = useState(false);
@@ -113,7 +113,7 @@ export default function Navbar() {
                             type="button"
                             onClick={() => setLangOpen((prev) => !prev)}
                             className="flex items-center gap-1 text-sm font-medium"
-                            style={{ color: WHITE }}
+                            style={{ color: DARK }}
                         >
                             {lang}
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
