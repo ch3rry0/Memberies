@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "../../../lib/prisma"
 import { SESSION_COOKIE_NAME, readCookieValue } from "../../../lib/auth"
 import { getCurrentUserByToken } from "../../../lib/current-user"
+import { getLangFromCookieHeader } from "../../../lib/lang"
 
 type CreatePostBody = {
   title?: unknown
@@ -39,11 +40,23 @@ function parseOptionalDate(value: unknown) {
 
 export async function POST(request: Request) {
   const cookieHeader = request.headers.get("cookie") ?? ""
+  const lang = getLangFromCookieHeader(cookieHeader)
+  const t = {
+    authRequired: lang === "en" ? "You must be signed in to create a post." : "Vous devez être connecté pour créer un post.",
+    requiredFields: lang === "en"
+      ? "Title, description and deceased person identity are required."
+      : "Le titre, la description et l'identité de la personne sont obligatoires.",
+    invalidDate: lang === "en" ? "One or more dates are invalid." : "La ou les dates fournies sont invalides.",
+    dateOrder: lang === "en"
+      ? "Death date must be after birth date."
+      : "La date de décès doit être postérieure à la date de naissance.",
+  }
+
   const token = readCookieValue(cookieHeader, SESSION_COOKIE_NAME)
   const user = await getCurrentUserByToken(token)
 
   if (!user) {
-    return NextResponse.json({ error: "Vous devez être connecté pour créer un post." }, { status: 401 })
+    return NextResponse.json({ error: t.authRequired }, { status: 401 })
   }
 
   const body = (await request.json().catch(() => ({}))) as CreatePostBody
@@ -60,18 +73,15 @@ export async function POST(request: Request) {
   const deathDate = parseOptionalDate(body.deathDate)
 
   if (!title || !content || !firstName || !lastName) {
-    return NextResponse.json(
-      { error: "Le titre, la description et l'identité de la personne sont obligatoires." },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: t.requiredFields }, { status: 400 })
   }
 
   if (birthDate === undefined || deathDate === undefined) {
-    return NextResponse.json({ error: "La ou les dates fournies sont invalides." }, { status: 400 })
+    return NextResponse.json({ error: t.invalidDate }, { status: 400 })
   }
 
   if (birthDate && deathDate && deathDate.getTime() < birthDate.getTime()) {
-    return NextResponse.json({ error: "La date de décès doit être postérieure à la date de naissance." }, { status: 400 })
+    return NextResponse.json({ error: t.dateOrder }, { status: 400 })
   }
 
   const post = await prisma.$transaction(async (transaction) => {

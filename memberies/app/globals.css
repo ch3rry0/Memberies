@@ -51,8 +51,5 @@ body {
 
 .font-script {
   font-family: var(--font-allura), cursive;
-}
-
-.font-script {
-  font-family: var(--font-allura), cursive;
+  font-size: 1.3rem;
 }

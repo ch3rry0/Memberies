@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { FormEvent, ReactNode } from "react"
+import type { Lang } from "../lib/lang"
 
 type Tab = "login" | "signup"
 
@@ -135,10 +136,65 @@ async function submitAuth(endpoint: string, payload: Record<string, unknown>) {
 
 type AuthPanelProps = {
   initialTab?: Tab
+  lang: Lang
 }
 
-export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
+const labels = {
+  en: {
+    titleLogin: "Welcome back,",
+    titleSignup: "Welcome,",
+    subtitleLogin: "Remember them? Why not your password ;)",
+    subtitleSignup: "New? Let's get you in!",
+    successLogin: "Logged in successfully.",
+    successSignup: "Account created and connected.",
+    errorLogin: "Login failed.",
+    errorSignup: "Registration failed.",
+    mismatch: "Passwords do not match.",
+    loginTab: "Log In",
+    signupTab: "Sign Up",
+    email: "E-mail",
+    password: "Password",
+    rememberMe: "Remember Me",
+    forgotPassword: "Forgot Password?",
+    loading: "Loading...",
+    fullName: "Full Name",
+    confirmPassword: "Confirm Password",
+    submitLogin: "Log In",
+    submitSignup: "Sign Up",
+    orLoginWith: "or log in with",
+    needHelp: "Need Help?",
+    lookHere: "Look here!",
+  },
+  fr: {
+    titleLogin: "Bon retour,",
+    titleSignup: "Bienvenue,",
+    subtitleLogin: "On se souvient d'eux, souvenez-vous aussi de votre mot de passe ;)",
+    subtitleSignup: "Nouveau ici ? Créons votre espace.",
+    successLogin: "Connexion réussie.",
+    successSignup: "Compte créé et connecté.",
+    errorLogin: "Connexion impossible.",
+    errorSignup: "Inscription impossible.",
+    mismatch: "Les mots de passe ne correspondent pas.",
+    loginTab: "Connexion",
+    signupTab: "Inscription",
+    email: "E-mail",
+    password: "Mot de passe",
+    rememberMe: "Se souvenir de moi",
+    forgotPassword: "Mot de passe oublié ?",
+    loading: "Chargement...",
+    fullName: "Nom complet",
+    confirmPassword: "Confirmer le mot de passe",
+    submitLogin: "Se connecter",
+    submitSignup: "S'inscrire",
+    orLoginWith: "ou se connecter avec",
+    needHelp: "Besoin d'aide ?",
+    lookHere: "Regardez ici !",
+  },
+} as const
+
+export function AuthPanel({ initialTab = "login", lang }: AuthPanelProps) {
   const tab = initialTab
+  const t = labels[lang]
   const [state, setState] = useState<AuthFormState>(defaultState)
   const [loginVisible, setLoginVisible] = useState(false)
   const [signupVisible, setSignupVisible] = useState(false)
@@ -147,10 +203,10 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
   const [success, setSuccess] = useState<string | null>(null)
   const router = useRouter()
 
-  const title = useMemo(() => (tab === "login" ? "Welcome back," : "Welcome,"), [tab])
+  const title = useMemo(() => (tab === "login" ? t.titleLogin : t.titleSignup), [tab, t.titleLogin, t.titleSignup])
   const subtitle = useMemo(
-    () => (tab === "login" ? "Remember them ? Why not your password ;)" : "New ? Let\'s get you in !"),
-    [tab],
+    () => (tab === "login" ? t.subtitleLogin : t.subtitleSignup),
+    [tab, t.subtitleLogin, t.subtitleSignup],
   )
 
   function resetMessages() {
@@ -172,10 +228,10 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
         rememberMe: formData.get("rememberMe") === "on",
       })
 
-      setSuccess("Connexion réussie.")
+      setSuccess(t.successLogin)
       router.refresh()
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Connexion impossible.")
+      setError(authError instanceof Error ? authError.message : t.errorLogin)
     } finally {
       setLoading(false)
     }
@@ -191,7 +247,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
     const confirmPassword = String(formData.get("confirmPassword") ?? "")
 
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.")
+      setError(t.mismatch)
       setLoading(false)
       return
     }
@@ -204,10 +260,10 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
         rememberMe: formData.get("rememberMe") === "on",
       })
 
-      setSuccess("Compte créé et connecté.")
+      setSuccess(t.successSignup)
       router.refresh()
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : "Inscription impossible.")
+      setError(authError instanceof Error ? authError.message : t.errorSignup)
     } finally {
       setLoading(false)
     }
@@ -227,7 +283,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
               onClick={resetMessages}
               className={`relative pb-3 pt-1 transition ${tab === "login" ? "text-stone-900" : "hover:text-stone-700"}`}
             >
-              Log In
+              {t.loginTab}
               <span className={`absolute inset-x-6 bottom-0 h-[3px] rounded-full bg-[#7d61b5] transition ${tab === "login" ? "opacity-100" : "opacity-0"}`} />
             </Link>
             <Link
@@ -235,7 +291,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
               onClick={resetMessages}
               className={`relative pb-3 pt-1 transition ${tab === "signup" ? "text-stone-900" : "hover:text-stone-700"}`}
             >
-              Sign Up
+              {t.signupTab}
               <span className={`absolute inset-x-6 bottom-0 h-[3px] rounded-full bg-[#7d61b5] transition ${tab === "signup" ? "opacity-100" : "opacity-0"}`} />
             </Link>
           </div>
@@ -263,7 +319,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
             {tab === "login" ? (
               <form className="space-y-5" onSubmit={handleLogin}>
                 <TextField
-                  label="E-mail"
+                  label={t.email}
                   fieldName="email"
                   type="email"
                   value={state.email}
@@ -273,7 +329,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                 />
 
                 <PasswordField
-                  label="Mot de passe"
+                  label={t.password}
                   fieldName="password"
                   value={state.password}
                   onChange={(value) => setState((current) => ({ ...current, password: value }))}
@@ -292,9 +348,9 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                       onChange={(event) => setState((current) => ({ ...current, rememberMe: event.target.checked }))}
                       className="h-4 w-4 rounded border-stone-300 text-[#7d61b5] focus:ring-[#7d61b5]"
                     />
-                    Remember Me
+                      {t.rememberMe}
                   </label>
-                  <span className="cursor-default text-stone-500">Forgot Password ?</span>
+                    <span className="cursor-default text-stone-500">{t.forgotPassword}</span>
                 </div>
 
                 <button
@@ -302,13 +358,13 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                   disabled={loading}
                   className="mt-5 flex h-14 w-full items-center justify-center rounded-[0.9rem] bg-[#8a74c3] text-[1.06rem] font-bold text-white shadow-[0_10px_22px_rgba(110,85,168,0.35)] transition hover:-translate-y-0.5 hover:bg-[#7f67bb] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loading ? "Loading..." : "Log In"}
+                  {loading ? t.loading : t.submitLogin}
                 </button>
               </form>
             ) : (
               <form className="space-y-5" onSubmit={handleSignup}>
                 <TextField
-                  label="Full Name"
+                  label={t.fullName}
                   fieldName="fullName"
                   value={state.fullName}
                   onChange={(value) => setState((current) => ({ ...current, fullName: value }))}
@@ -317,7 +373,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                 />
 
                 <TextField
-                  label="E-Mail"
+                  label={t.email}
                   fieldName="email"
                   type="email"
                   value={state.email}
@@ -327,7 +383,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                 />
 
                 <PasswordField
-                  label="Password"
+                  label={t.password}
                   fieldName="password"
                   value={state.password}
                   onChange={(value) => setState((current) => ({ ...current, password: value }))}
@@ -338,7 +394,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                 />
 
                 <PasswordField
-                  label="Confirm Password"
+                  label={t.confirmPassword}
                   fieldName="confirmPassword"
                   value={state.confirmPassword}
                   onChange={(value) => setState((current) => ({ ...current, confirmPassword: value }))}
@@ -356,7 +412,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                     onChange={(event) => setState((current) => ({ ...current, rememberMe: event.target.checked }))}
                     className="h-4 w-4 rounded border-stone-300 text-[#7d61b5] focus:ring-[#7d61b5]"
                   />
-                  Remember Me
+                  {t.rememberMe}
                 </label>
 
                 <button
@@ -364,7 +420,7 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
                   disabled={loading}
                   className="mt-5 flex h-14 w-full items-center justify-center rounded-[0.9rem] bg-[#8a74c3] text-[1.06rem] font-bold text-white shadow-[0_10px_22px_rgba(110,85,168,0.35)] transition hover:-translate-y-0.5 hover:bg-[#7f67bb] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loading ? "Loading..." : "Sign Up"}
+                  {loading ? t.loading : t.submitSignup}
                 </button>
               </form>
             )}
@@ -373,15 +429,15 @@ export function AuthPanel({ initialTab = "login" }: AuthPanelProps) {
           <div className="mx-auto mt-8 max-w-[31rem]">
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-x-0 top-1/2 h-px bg-stone-200" />
-              <span className="relative z-10 bg-[#fbf7f2] px-4 text-sm text-stone-500">or log in with</span>
+              <span className="relative z-10 bg-[#fbf7f2] px-4 text-sm text-stone-500">{t.orLoginWith}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="mx-auto mt-10 max-w-[28rem] text-center text-stone-500">
-        <p className="text-sm">Need Help ?</p>
-        <p className="mt-1 text-sm">Look here !</p>
+        <p className="text-sm">{t.needHelp}</p>
+        <p className="mt-1 text-sm">{t.lookHere}</p>
       </div>
     </div>
   )

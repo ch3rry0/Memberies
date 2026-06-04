@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
+import type { Lang } from "../lib/lang"
 
 export type PublicPostCard = {
   id: string
@@ -21,7 +22,55 @@ export type PublicPostCard = {
 
 type PostBrowserProps = {
   posts: PublicPostCard[]
+  lang: Lang
 }
+
+const labels = {
+  en: {
+    publications: "Publications",
+    publicPosts: "Public posts",
+    intro: "Find here all public tributes as cards opening a detailed view without leaving the page.",
+    emptyTitle: "No public posts yet.",
+    emptySubtitle: "Cards will appear here as soon as a post is made public.",
+    memory: "Public memory",
+    death: "Death",
+    age: "Age",
+    author: "Author",
+    updated: "Updated",
+    details: "Post details",
+    closeDetails: "Close details panel",
+    close: "Close",
+    summary: "Summary",
+    deceased: "Deceased person",
+    relation: "Relation",
+    unknown: "Not provided",
+    ageAtDeath: "Age at death",
+    lastUpdate: "Last update",
+    fullDescription: "Full description",
+  },
+  fr: {
+    publications: "Publications",
+    publicPosts: "Les posts publics",
+    intro: "Retrouvez ici les témoignages rendus publics, sous forme de cartes ouvrant un descriptif détaillé sans quitter la page.",
+    emptyTitle: "Aucun post public pour le moment.",
+    emptySubtitle: "Les cartes apparaîtront ici dès qu’un post sera rendu public.",
+    memory: "Souvenir public",
+    death: "Décès",
+    age: "Âge",
+    author: "Auteur",
+    updated: "Mise à jour",
+    details: "Détail du post",
+    closeDetails: "Fermer la fenêtre de détails",
+    close: "Fermer",
+    summary: "Résumé",
+    deceased: "Personne décédée",
+    relation: "Relation",
+    unknown: "Non renseignée",
+    ageAtDeath: "Âge au décès",
+    lastUpdate: "Dernière modification",
+    fullDescription: "Descriptif complet",
+  },
+} as const
 
 function CloseIcon() {
   return (
@@ -31,7 +80,8 @@ function CloseIcon() {
   )
 }
 
-export default function PostBrowser({ posts }: PostBrowserProps) {
+export default function PostBrowser({ posts, lang }: PostBrowserProps) {
+  const t = labels[lang]
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const selectedPost = useMemo(() => posts.find((post) => post.id === selectedId) ?? null, [posts, selectedId])
@@ -54,16 +104,16 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
       <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <p className="font-script text-3xl text-[#7d61b5]">Publications</p>
-          <h1 className="mt-2 text-4xl font-black tracking-[-0.05em] text-stone-950 sm:text-5xl">Les posts publics</h1>
+          <h1 className="mt-2 text-4xl font-black tracking-[-0.05em] text-stone-950 sm:text-5xl">{t.publicPosts}</h1>
           <p className="mx-auto mt-4 max-w-3xl text-base text-stone-600 sm:text-lg">
-            Retrouvez ici les témoignages rendus publics, sous forme de cartes ouvrant un descriptif détaillé sans quitter la page.
+            {t.intro}
           </p>
         </div>
 
         {posts.length === 0 ? (
           <div className="rounded-[2rem] border border-white/70 bg-[#fbf7f2] px-6 py-14 text-center shadow-[0_18px_38px_rgba(87,60,141,0.12)]">
-            <p className="text-lg font-semibold text-stone-900">Aucun post public pour le moment.</p>
-            <p className="mt-2 text-stone-600">Les cartes apparaîtront ici dès qu’un post sera rendu public.</p>
+            <p className="text-lg font-semibold text-stone-900">{t.emptyTitle}</p>
+            <p className="mt-2 text-stone-600">{t.emptySubtitle}</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -87,7 +137,7 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
                     <div className="flex h-full w-full items-center justify-center p-6 text-center text-white">
                       <div>
                         <p className="font-script text-4xl">Memberies</p>
-                        <p className="mt-2 text-sm uppercase tracking-[0.35em]">Souvenir public</p>
+                        <p className="mt-2 text-sm uppercase tracking-[0.35em]">{t.memory}</p>
                       </div>
                     </div>
                   )}
@@ -103,19 +153,19 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
 
                   <dl className="grid gap-3 text-sm text-stone-700 sm:grid-cols-2">
                     <div>
-                      <dt className="uppercase tracking-[0.2em] text-stone-400">Décès</dt>
+                      <dt className="uppercase tracking-[0.2em] text-stone-400">{t.death}</dt>
                       <dd className="mt-1 font-semibold text-stone-900">{post.deathDateLabel}</dd>
                     </div>
                     <div>
-                      <dt className="uppercase tracking-[0.2em] text-stone-400">Âge</dt>
+                      <dt className="uppercase tracking-[0.2em] text-stone-400">{t.age}</dt>
                       <dd className="mt-1 font-semibold text-stone-900">{post.ageAtDeathLabel}</dd>
                     </div>
                     <div>
-                      <dt className="uppercase tracking-[0.2em] text-stone-400">Auteur</dt>
+                      <dt className="uppercase tracking-[0.2em] text-stone-400">{t.author}</dt>
                       <dd className="mt-1 font-semibold text-stone-900 break-words">{post.authorName}</dd>
                     </div>
                     <div>
-                      <dt className="uppercase tracking-[0.2em] text-stone-400">Mise à jour</dt>
+                      <dt className="uppercase tracking-[0.2em] text-stone-400">{t.updated}</dt>
                       <dd className="mt-1 font-semibold text-stone-900">{post.updatedAtLabel}</dd>
                     </div>
                   </dl>
@@ -130,7 +180,7 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
           <button
             type="button"
-            aria-label="Fermer la fenêtre de détails"
+            aria-label={t.closeDetails}
             className="absolute inset-0 bg-stone-950/55 backdrop-blur-sm"
             onClick={() => setSelectedId(null)}
           />
@@ -138,14 +188,14 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
           <article className="relative z-10 max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-white/70 bg-[#fbf7f2] shadow-[0_30px_80px_rgba(30,15,60,0.32)]">
             <div className="flex items-start justify-between gap-4 border-b border-stone-200/80 px-6 py-5 sm:px-8">
               <div>
-                <p className="font-script text-2xl text-[#7d61b5]">Détail du post</p>
+                <p className="font-script text-2xl text-[#7d61b5]">{t.details}</p>
                 <h2 className="mt-1 text-3xl font-black tracking-[-0.05em] text-stone-950">{selectedPost.title}</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedId(null)}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition hover:bg-stone-100"
-                aria-label="Fermer"
+                aria-label={t.close}
               >
                 <CloseIcon />
               </button>
@@ -165,7 +215,7 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
                   <div className="flex h-full min-h-[320px] items-center justify-center p-8 text-center text-white">
                     <div>
                       <p className="font-script text-5xl">Memberies</p>
-                      <p className="mt-3 text-sm uppercase tracking-[0.35em]">Souvenir public</p>
+                      <p className="mt-3 text-sm uppercase tracking-[0.35em]">{t.memory}</p>
                     </div>
                   </div>
                 )}
@@ -173,21 +223,21 @@ export default function PostBrowser({ posts }: PostBrowserProps) {
 
               <div className="space-y-6 px-6 py-6 sm:px-8 sm:py-8">
                 <div className="rounded-3xl border border-stone-200 bg-white/80 p-5">
-                  <p className="text-sm uppercase tracking-[0.3em] text-stone-400">Résumé</p>
+                  <p className="text-sm uppercase tracking-[0.3em] text-stone-400">{t.summary}</p>
                   <p className="mt-3 text-base leading-7 text-stone-700">{selectedPost.summary}</p>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <InfoBlock label="Personne décédée" value={selectedPost.deceasedName} />
-                  <InfoBlock label="Relation" value={selectedPost.relationship ?? "Non renseignée"} />
-                  <InfoBlock label="Décès" value={selectedPost.deathDateLabel} />
-                  <InfoBlock label="Âge au décès" value={selectedPost.ageAtDeathLabel} />
-                  <InfoBlock label="Auteur" value={selectedPost.authorName} />
-                  <InfoBlock label="Dernière modification" value={selectedPost.updatedAtLabel} />
+                  <InfoBlock label={t.deceased} value={selectedPost.deceasedName} />
+                  <InfoBlock label={t.relation} value={selectedPost.relationship ?? t.unknown} />
+                  <InfoBlock label={t.death} value={selectedPost.deathDateLabel} />
+                  <InfoBlock label={t.ageAtDeath} value={selectedPost.ageAtDeathLabel} />
+                  <InfoBlock label={t.author} value={selectedPost.authorName} />
+                  <InfoBlock label={t.lastUpdate} value={selectedPost.updatedAtLabel} />
                 </div>
 
                 <div className="rounded-3xl border border-stone-200 bg-white/80 p-5">
-                  <p className="text-sm uppercase tracking-[0.3em] text-stone-400">Descriptif complet</p>
+                  <p className="text-sm uppercase tracking-[0.3em] text-stone-400">{t.fullDescription}</p>
                   <p className="mt-3 whitespace-pre-line text-base leading-7 text-stone-700">{selectedPost.content}</p>
                 </div>
               </div>

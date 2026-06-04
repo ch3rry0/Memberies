@@ -1,13 +1,15 @@
 import Link from "next/link"
+import { cookies } from "next/headers"
 import { prisma } from "../../lib/prisma"
 import PostBrowser, { type PublicPostCard } from "../../components/PostBrowser"
+import { LANG_COOKIE_NAME, normalizeLang } from "../../lib/lang"
 
 export const dynamic = "force-dynamic"
 
-function formatDate(value: Date | null | undefined) {
-  if (!value) return "Non renseignée"
+function formatDate(value: Date | null | undefined, locale: string, unknownLabel: string) {
+  if (!value) return unknownLabel
 
-  return new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
   }).format(value)
 }
@@ -41,6 +43,11 @@ function buildSummary(content: string) {
 }
 
 export default async function PostsPage() {
+  const cookieStore = await cookies()
+  const lang = normalizeLang(cookieStore.get(LANG_COOKIE_NAME)?.value)
+  const locale = lang === "en" ? "en-US" : "fr-FR"
+  const unknownDateLabel = lang === "en" ? "Not provided" : "Non renseignée"
+
   const posts = await prisma.post.findMany({
     where: { isPublic: true },
     include: {
@@ -56,36 +63,42 @@ export default async function PostsPage() {
     summary: buildSummary(post.content),
     coverImage: post.coverImage,
     deceasedName: `${post.deceased.firstName} ${post.deceased.lastName}`.trim(),
-    deathDateLabel: formatDate(post.deceased.deathDate),
+    deathDateLabel: formatDate(post.deceased.deathDate, locale, unknownDateLabel),
     ageAtDeathLabel: formatAge(post.deceased.birthDate, post.deceased.deathDate),
     authorName: post.author.name,
-    updatedAtLabel: formatDate(post.updatedAt),
-    createdAtLabel: formatDate(post.createdAt),
+    updatedAtLabel: formatDate(post.updatedAt, locale, unknownDateLabel),
+    createdAtLabel: formatDate(post.createdAt, locale, unknownDateLabel),
     content: post.content,
     relationship: post.deceased.relationship,
     deceasedPhoto: post.deceased.photo,
   }))
 
+  const createBadge = lang === "en" ? "Create" : "Création"
+  const createHint = lang === "en"
+    ? "You can also write a new tribute from the dedicated page."
+    : "Vous pouvez aussi rédiger un nouveau témoignage depuis la page dédiée."
+  const createButton = lang === "en" ? "Create post" : "Créer un post"
+
   return (
     <>
-      <section className="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-7xl px-4 pt-22 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 rounded-[2rem] border border-white/70 bg-[#fbf7f2] px-6 py-5 shadow-[0_18px_38px_rgba(87,60,141,0.12)] sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-[#7d61b5]">Création</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-[#7d61b5]">{createBadge}</p>
             <p className="mt-2 text-base text-stone-700">
-              Vous pouvez aussi rédiger un nouveau témoignage depuis la page dédiée.
+              {createHint}
             </p>
           </div>
           <Link
             href="/posts/new"
             className="inline-flex h-12 items-center justify-center rounded-full bg-[#8a74c3] px-6 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(110,85,168,0.35)] transition hover:-translate-y-0.5 hover:bg-[#7f67bb]"
           >
-            Créer un post
+            {createButton}
           </Link>
         </div>
       </section>
 
-      <PostBrowser posts={mappedPosts} />
+      <PostBrowser posts={mappedPosts} lang={lang} />
     </>
   )
 }
